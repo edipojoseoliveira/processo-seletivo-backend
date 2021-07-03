@@ -45,32 +45,47 @@ public class StatusServicoTarefaConsulta {
 				String statusConsultaCadastro = retornaStatusServico(tableTds, 7);
 				String statusRecepcaoEvento = retornaStatusServico(tableTds, 8);
 
-				StatusServicoHistorico historico = new StatusServicoHistorico(null, new Date(), estado, 
-						statusAutorizacao, statusRetornoAutorizacao, statusInutilizacao, statusConsultaProtocolo, 
-						statusServico, statusConsultaCadastro, statusRecepcaoEvento);
-				
-				StatusServico statusServicoNf = new StatusServico(null, estado, statusAutorizacao, 
-						statusRetornoAutorizacao, statusInutilizacao, statusConsultaProtocolo, 
-						statusServico, statusConsultaCadastro, statusRecepcaoEvento);
-				
-				Optional<StatusServico> optStatusServico= this.repository.findByEstado(estado);
-				if (optStatusServico.isPresent()) {
-					statusServicoNf = optStatusServico.get();
-					statusServicoNf.setStatusAutorizacao(statusAutorizacao);
-					statusServicoNf.setStatusConsultaCadastro(statusConsultaCadastro);
-					statusServicoNf.setStatusConsultaProtocolo(statusConsultaProtocolo);
-					statusServicoNf.setStatusInutilizacao(statusInutilizacao);
-					statusServicoNf.setStatusRecepcaoEvento(statusRecepcaoEvento);
-					statusServicoNf.setStatusRetornoAutorizacao(statusRetornoAutorizacao);
-					statusServicoNf.setStatusServico(statusServico);
-				}
-
-				this.historicoRepository.save(historico);
-				this.repository.save(statusServicoNf);
+				this.salvarHistoricoStatusServicos(estado, statusAutorizacao,
+						statusRetornoAutorizacao, statusInutilizacao, statusConsultaProtocolo, statusServico,
+						statusConsultaCadastro, statusRecepcaoEvento);
+				this.salvarStatusServicos(estado, statusAutorizacao, statusRetornoAutorizacao, statusInutilizacao,
+						statusConsultaProtocolo, statusServico, statusConsultaCadastro, statusRecepcaoEvento);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	private void salvarStatusServicos(String estado, String statusAutorizacao, String statusRetornoAutorizacao,
+			String statusInutilizacao, String statusConsultaProtocolo, String statusServico,
+			String statusConsultaCadastro, String statusRecepcaoEvento) {
+		StatusServico statusServicoNf;
+		Optional<StatusServico> optStatusServico= this.repository.findByEstado(estado);
+		if (optStatusServico.isPresent()) {
+			statusServicoNf = optStatusServico.get();
+			statusServicoNf.setStatusAutorizacao(statusAutorizacao);
+			statusServicoNf.setStatusConsultaCadastro(statusConsultaCadastro);
+			statusServicoNf.setStatusConsultaProtocolo(statusConsultaProtocolo);
+			statusServicoNf.setStatusInutilizacao(statusInutilizacao);
+			statusServicoNf.setStatusRecepcaoEvento(statusRecepcaoEvento);
+			statusServicoNf.setStatusRetornoAutorizacao(statusRetornoAutorizacao);
+			statusServicoNf.setStatusServico(statusServico);
+		} else {
+			statusServicoNf = new StatusServico(null, estado, statusAutorizacao, 
+					statusRetornoAutorizacao, statusInutilizacao, statusConsultaProtocolo, 
+					statusServico, statusConsultaCadastro, statusRecepcaoEvento);
+		}
+
+		this.repository.save(statusServicoNf);
+	}
+
+	private void salvarHistoricoStatusServicos(String estado, String statusAutorizacao,
+			String statusRetornoAutorizacao, String statusInutilizacao, String statusConsultaProtocolo,
+			String statusServico, String statusConsultaCadastro, String statusRecepcaoEvento) {
+		StatusServicoHistorico historico = new StatusServicoHistorico(null, new Date(), estado, 
+				statusAutorizacao, statusRetornoAutorizacao, statusInutilizacao, statusConsultaProtocolo, 
+				statusServico, statusConsultaCadastro, statusRecepcaoEvento);
+		this.historicoRepository.save(historico);
 	}
 
 	private String retornaStatusServico(Elements tableTds, Integer indexColuna) {

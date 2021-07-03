@@ -1,7 +1,6 @@
 package com.edipo.backend.controller;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -26,6 +25,8 @@ public class StatusServicoController {
 	
 	@GetMapping("/listar-status-por-estado")
 	public List<StatusServico> buscarPorEstado(@RequestParam(value = "estado") String estado) {
+		if (estado != null)
+			estado = estado.toUpperCase().trim();
 		return this.repository.findAllByEstado(estado);
 	}
 	
