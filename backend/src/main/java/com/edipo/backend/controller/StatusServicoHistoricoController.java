@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -14,17 +13,20 @@ import com.edipo.backend.model.StatusServico;
 import com.edipo.backend.model.StatusServicoHistorico;
 import com.edipo.backend.repository.StatusServicoHistoricoRepository;
 import com.edipo.backend.repository.StatusServicoRepository;
+import com.edipo.backend.repository.StatusServicoRepositoryCustom;
 
 @RestController
 public class StatusServicoHistoricoController {
 	
 	private final StatusServicoHistoricoRepository historicorepository;
+	private final StatusServicoRepositoryCustom historicorepositoryCustom;
 	private final StatusServicoRepository servicorepository;
 	
 	public StatusServicoHistoricoController(StatusServicoHistoricoRepository historicorepository,
-			StatusServicoRepository servicorepository) {
+			StatusServicoRepository servicorepository, StatusServicoRepositoryCustom historicorepositoryCustom) {
 		this.historicorepository = historicorepository;
 		this.servicorepository = servicorepository;
+		this.historicorepositoryCustom = historicorepositoryCustom;
 	}
 	
 	@GetMapping("/listar-status-por-data")
@@ -60,16 +62,7 @@ public class StatusServicoHistoricoController {
 	
 	@GetMapping("/buscar-status-mais-indisponivel")
 	public StatusServico buscarMaisIndisponivel() {
-		List<StatusServico> listaStatusServicos = this.servicorepository.findAll();
-		if (listaStatusServicos == null || listaStatusServicos.isEmpty()) {
-			return new StatusServico();
-		}
-		for (StatusServico statusServicoNf : listaStatusServicos) {
-			long contadorIndisponibilidade = this.historicorepository.countIndisponibilidadeServico(statusServicoNf.getEstado());
-			statusServicoNf.setQtdIndisponibilidades(contadorIndisponibilidade);
-		}
-		listaStatusServicos = listaStatusServicos.stream().sorted((s1, s2) -> s1.getQtdIndisponibilidades().compareTo(s2.getQtdIndisponibilidades())).collect(Collectors.toList());
-		return listaStatusServicos.get(listaStatusServicos.size() - 1);
+		return this.historicorepositoryCustom.buscarEstadoComMaisIndisponibilidade();
 	}
 	
 }
